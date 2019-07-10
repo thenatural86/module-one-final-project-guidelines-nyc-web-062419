@@ -1,5 +1,7 @@
 class Interface
-
+    
+    @user_name = "none"
+    # @name = "none"
     def self.start_screen
         system "clear"
         puts <<-start
@@ -39,7 +41,9 @@ class Interface
         print "Create Username: "
         username = gets.chomp
 
-        User.find_or_create_by(username: username, password: log_in_password, email: log_in_email)
+        @user_name = username
+
+       current_user = User.find_or_create_by(username: username, password: log_in_password, email: log_in_email)
 
         self.accountgreet
     end
@@ -74,29 +78,37 @@ class Interface
         system "clear"
         print "Enter city location: "
         city = gets.chomp
-
+        # @name = city
         response_string = RestClient.get("http://api.openweathermap.org/data/2.5/weather?q=#{city}&appid=ebf9477d55487b4ca83294bf1aa1af97")
 
         response_hash = JSON.parse(response_string)
-
+        
         fahr_temp = (((response_hash['main']['temp']) - 273.15) * 9/5 + 32).to_i
         main = response_hash['weather'][0]['main']
         description = response_hash['weather'][0]['description']
+        city = response_hash['name']
         
-
         puts "The conditions are #{main} with #{description}"
         puts "The temperature is #{fahr_temp}"
         print "1) Save Location 2) Return to main menu:"
         select = gets.chomp
-
+        
         case select
         when "1"
-            Location.find_or_create_by(name: city,temp: fahr_temp, main: main, description: description)
+            person_id = User.find_by(username: @user_name)
+            city_id = Location.find_by(name: city)
+            result = UserLocation.find_or_create_by(user: person_id,location: city_id)
             binding.pry
-            self.accountgreet
+            #puts "Yay!"
+            # Location.find_or_create_by(name: city,temp: fahr_temp, main: main, description: description)
+            # self.accountgreet
         when "2"
             self.accountgreet
         end
+
+        # def self.saved_locations
+            
+        # end
 
 
     end
