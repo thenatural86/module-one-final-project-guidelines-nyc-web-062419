@@ -78,27 +78,29 @@ class Interface
         response_string = RestClient.get("http://api.openweathermap.org/data/2.5/weather?q=#{city}&appid=ebf9477d55487b4ca83294bf1aa1af97")
 
         response_hash = JSON.parse(response_string)
-        # city = Location.find_or_create_by(city)
-        # main = Location.find_or_create_by(main: response_hash["Weather"])
-        
-        #description = response_hash.find_or_create_by["weather"][0]["description"]
 
-        # binding.pry
-        # temp = fahr_temp
-        temp = response_hash['main']['temp']
-        fahr_temp = ((temp - 273.15) * 9/5 + 32).to_i
+        fahr_temp = (((response_hash['main']['temp']) - 273.15) * 9/5 + 32).to_i
+        main = response_hash['weather'][0]['main']
+        description = response_hash['weather'][0]['description']
         
-        # binding.pry
 
-        puts "The conditions are #{response_hash['weather'][0]['main']} with #{response_hash['weather'][0]['description']}"
+        puts "The conditions are #{main} with #{description}"
         puts "The temperature is #{fahr_temp}"
+        print "1) Save Location 2) Return to main menu:"
+        select = gets.chomp
+
+        case select
+        when "1"
+            Location.find_or_create_by(name: city,temp: fahr_temp, main: main, description: description)
+            binding.pry
+            self.accountgreet
+        when "2"
+            self.accountgreet
+        end
+
 
     end
 
-    def self.get_weather
-        response_hash['weather'][0]
-    end
-    
     
 
     def self.log_out
